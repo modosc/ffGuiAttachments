@@ -63,15 +63,15 @@ public:
      If you set \param selectSubNodes, the selected child node corresponding to
      the Button with the same ComponentID will get the property "selected" == 1.
      */
-    ValueTreeRadioButtonGroupAttachment (juce::ValueTree& attachToTree,
+    ValueTreeRadioButtonGroupAttachment (juce::ValueTree& _tree,
                                          juce::Array<juce::Button*>& _buttons,
-                                         juce::Identifier indexProperty,
-                                         bool shouldSelectSubNodes,
-                                         juce::UndoManager* undoManagerToUse = nullptr)
-    :   tree (attachToTree),
-        property (indexProperty),
-        selectSubNodes (shouldSelectSubNodes),
-        undoMgr (undoManagerToUse),
+                                         juce::Identifier _property,
+                                         bool _selectSubNodes,
+                                         juce::UndoManager* _undoMgr = nullptr)
+    :   tree (_tree),
+        property (_property),
+        selectSubNodes (_selectSubNodes),
+        undoMgr (_undoMgr),
         updating (false)
     {
 
@@ -111,7 +111,7 @@ public:
         tree.addListener (this);
     }
 
-    ~ValueTreeRadioButtonGroupAttachment ()
+    ~ValueTreeRadioButtonGroupAttachment () override
     {
         tree.removeListener (this);
         for (auto b : buttons) {
@@ -177,18 +177,12 @@ public:
         }
     }
 
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override {}
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
-    void valueTreeParentChanged (juce::ValueTree &treeWhoseParentHasChanged) override {}
-    void valueTreeRedirected (juce::ValueTree &treeWhichHasBeenChanged) override {}
-
 private:
-    juce::ValueTree    tree;
+    juce::ValueTree tree;
     juce::Array<juce::Component::SafePointer<juce::Button> > buttons;
-    juce::Identifier   property;
-    bool               selectSubNodes;
-    juce::UndoManager* undoMgr  = nullptr;
-    bool               updating = false;;
+    juce::Identifier property;
+    bool selectSubNodes;
+    juce::UndoManager* undoMgr;
+    bool updating;
 
 };

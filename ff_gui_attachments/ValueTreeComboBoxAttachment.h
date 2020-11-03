@@ -50,12 +50,12 @@
 /**
  \class ValueTreeComboBoxAttachment
  \brief This attachment connects a node in a ValueTree with a combobox
- 
+
  The ValueTreeComboBoxAttachment supports two modes:
  selectSubNodes == true: The Combobox is filled with the sub nodes. As combobox items the
  property is used.
 
- selectSubNodes == false: The combobox has already it's items and the selected index 
+ selectSubNodes == false: The combobox has already it's items and the selected index
  is stored in the property.
  */
 class ValueTreeComboBoxAttachment : public juce::ComboBox::Listener,
@@ -68,36 +68,35 @@ public:
      If you set \param selectSubNodes, the ComboBox will get the child nodes as options.
      The selected child node will get the property "selected" == 1.
      */
-    ValueTreeComboBoxAttachment (juce::ValueTree& attachToTree,
-                                 juce::ComboBox* comboBoxToAttach,
-                                 juce::Identifier indexProperty,
-                                 bool shouldSelectSubNodes,
-                                 juce::UndoManager* undoManagerToUse = nullptr)
-    :   tree (attachToTree),
-        property (indexProperty),
-        selectSubNodes (shouldSelectSubNodes),
-        undoMgr (undoManagerToUse)
-    {
-        // Don't attach an invalid valuetree!
-        jassert (tree.isValid());
-        comboBox = comboBoxToAttach;
+  ValueTreeComboBoxAttachment(juce::ValueTree &attachToTree,
+                              juce::ComboBox *comboBoxToAttach,
+                              juce::Identifier indexProperty,
+                              bool shouldSelectSubNodes,
+                              juce::UndoManager *undoManagerToUse = nullptr)
+      : tree(attachToTree),
+        property(indexProperty),
+        selectSubNodes(shouldSelectSubNodes),
+        undoMgr(undoManagerToUse),
+        updating(false) {
+    // Don't attach an invalid valuetree!
+    jassert(tree.isValid());
+    comboBox = comboBoxToAttach;
 
-        if (selectSubNodes) {
-            updateChoices ();
-        }
-        else {
-            if (tree.hasProperty (property)) {
-                comboBox->setSelectedItemIndex (tree.getProperty(property));
-            }
-            else {
-                tree.setProperty (property, comboBox->getSelectedItemIndex(), undoMgr);
-            }
-        }
-        tree.addListener (this);
-        comboBox->addListener (this);
+    if (selectSubNodes) {
+      updateChoices();
+    } else {
+      if (tree.hasProperty(property)) {
+        comboBox->setSelectedItemIndex((int)tree.getProperty(property));
+      } else {
+        tree.setProperty(
+            property, (int)comboBox->getSelectedItemIndex(), undoMgr);
+      }
     }
+    tree.addListener(this);
+    comboBox->addListener(this);
+  }
 
-    ~ValueTreeComboBoxAttachment ()
+    ~ValueTreeComboBoxAttachment () override
     {
         tree.removeListener (this);
         if (comboBox) {
@@ -123,7 +122,7 @@ public:
                     }
                 }
                 else {
-                    tree.setProperty (property, comboBox->getSelectedItemIndex (), undoMgr);
+                    tree.setProperty (property, (int) comboBox->getSelectedItemIndex(), undoMgr);
                 }
             }
             updating = false;
@@ -131,16 +130,16 @@ public:
     }
 
     /** Updates the ComboBox property if the ValueTree has changed */
-    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &changedProperty) override
+    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &_property) override
     {
         if (! updating) {
             updating = true;
             if (selectSubNodes) {
                 if (treeWhosePropertyHasChanged.getParent() == tree) {
-                    if (changedProperty == property) {
+                    if (_property == property) {
                         updateChoices();
                     }
-                    else if (changedProperty == FF::propSelected) {
+                    else if (_property == FF::propSelected) {
                         for (int i=0; i < tree.getNumChildren(); ++i) {
                             if (tree.getChild (i).hasProperty (FF::propSelected)
                                 && static_cast<int> (tree.getChild (i).getProperty (FF::propSelected)) > 0)
@@ -152,7 +151,7 @@ public:
                 }
             }
             else {
-                if (treeWhosePropertyHasChanged == tree && changedProperty == property && comboBox) {
+                if (treeWhosePropertyHasChanged == tree && _property == property && comboBox) {
                     if (tree.hasProperty (property)) {
                         const int idx = tree.getProperty (property);
                         comboBox->setSelectedItemIndex (idx);
@@ -162,25 +161,21 @@ public:
             updating = false;
         }
     }
-    
+
     /** If the ValueTree has new child nodes, they will be added as options in the ComboBox */
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override
+    void valueTreeChildAdded ( [[maybe_unused]] juce::ValueTree &parentTree,  [[maybe_unused]] juce::ValueTree &childWhichHasBeenAdded) override
     {
         if (selectSubNodes) {
             updateChoices ();
         }
     }
     /** If child nodes were removed from the ValueTree, the options of the ComboBox are updated */
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override
+    void valueTreeChildRemoved ( [[maybe_unused]] juce::ValueTree &parentTree,  [[maybe_unused]] juce::ValueTree &childWhichHasBeenRemoved,  [[maybe_unused]] int indexFromWhichChildWasRemoved) override
     {
         if (selectSubNodes) {
             updateChoices ();
         }
     }
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
-    void valueTreeParentChanged (juce::ValueTree &treeWhoseParentHasChanged) override {}
-    void valueTreeRedirected (juce::ValueTree &treeWhichHasBeenChanged) override {}
-
 
 private:
 
@@ -203,6 +198,6 @@ private:
     juce::Component::SafePointer<juce::ComboBox>    comboBox;
     juce::Identifier                                property;
     bool                                            selectSubNodes;
-    juce::UndoManager*                              undoMgr  = nullptr;
-    bool                                            updating = false;
+    juce::UndoManager*                              undoMgr;
+    bool                                            updating;
 };

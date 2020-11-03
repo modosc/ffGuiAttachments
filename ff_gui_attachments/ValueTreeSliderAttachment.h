@@ -56,19 +56,20 @@ public:
      Creates a ValueTreeSliderAttachment. The Slider gets it's values from properties of the ValueTree node.
      You can specify the names of the corresponding properties here.
     */
-    ValueTreeSliderAttachment (juce::ValueTree& attachToTree,
+    ValueTreeSliderAttachment (juce::ValueTree& _tree,
                                juce::Slider* _slider,
-                               juce::Identifier valueProperty,
-                               juce::UndoManager* undoManagerToUse = nullptr,
-                               juce::Identifier propertyForMinimum = FF::propMinimumDefault,
-                               juce::Identifier propertyForMaximum = FF::propMaximumDefault,
-                               juce::Identifier propertyForInterval = FF::propIntervalDefault)
-    :   tree     (attachToTree),
-        property (valueProperty),
-        undoMgr  (undoManagerToUse),
-        propMinimum  (propertyForMinimum),
-        propMaximum  (propertyForMaximum),
-        propInterval (propertyForInterval)
+                               juce::Identifier _property,
+                               juce::UndoManager* _undoMgr = nullptr,
+                               juce::Identifier _propMinimum = FF::propMinimumDefault,
+                               juce::Identifier _propMaximum = FF::propMaximumDefault,
+                               juce::Identifier _propInterval = FF::propIntervalDefault)
+    :   tree (_tree),
+        property (_property),
+        undoMgr (_undoMgr),
+        propMinimum (_propMinimum),
+        propMaximum (_propMaximum),
+        propInterval (_propInterval),
+        updating (false)
     {
         // Don't attach an invalid valuetree!
         jassert (tree.isValid());
@@ -89,7 +90,7 @@ public:
         slider->addListener (this);
     }
 
-    ~ValueTreeSliderAttachment ()
+    ~ValueTreeSliderAttachment () override
     {
         tree.removeListener (this);
         if (slider) {
@@ -100,11 +101,11 @@ public:
     /**
      This updates the ValueTree's property to reflect the Slider's position
      */
-    void sliderValueChanged (juce::Slider *sliderThatChanged) override
+    void sliderValueChanged (juce::Slider *_slider) override
     {
         if (! updating) {
             updating = true;
-            if (slider == sliderThatChanged) {
+            if (slider == _slider) {
                 tree.setProperty (property, slider->getValue(), undoMgr);
             }
             updating = false;
@@ -114,12 +115,12 @@ public:
     /**
      This updates the Slider to reflect the ValueTree's property
      */
-    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &changedProperty) override
+    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &_property) override
     {
         if (! updating) {
             updating = true;
             if (treeWhosePropertyHasChanged == tree && slider) {
-                if (changedProperty == property) {
+                if (_property == property) {
                     slider->setValue (tree.getProperty (property));
                 }
                 else if (property == propMinimum || property == propMaximum || property == propInterval) {
@@ -132,20 +133,14 @@ public:
             updating = false;
         }
     }
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override {}
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
-    void valueTreeParentChanged (juce::ValueTree &treeWhoseParentHasChanged) override {}
-    void valueTreeRedirected (juce::ValueTree &treeWhichHasBeenChanged) override {}
-
 
 private:
     juce::ValueTree                             tree;
     juce::Component::SafePointer<juce::Slider>  slider;
     juce::Identifier                            property;
-    juce::UndoManager*                          undoMgr = nullptr;
+    juce::UndoManager*                          undoMgr;
     juce::Identifier                            propMinimum;
     juce::Identifier                            propMaximum;
     juce::Identifier                            propInterval;
-    bool                                        updating = false;
+    bool                                        updating;
 };

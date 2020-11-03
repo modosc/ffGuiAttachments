@@ -58,31 +58,44 @@ public:
      Creates an attachment to synchronise a Label to a ValueTree node.
      You can set a \param property, in which the text the label is showing is stored
      */
-    ValueTreeLabelAttachment (juce::ValueTree& attachToTree,
-                               juce::Label* attachToLabel,
-                               juce::Identifier textProperty,
-                               juce::UndoManager* undoManagerToUse = nullptr)
-    :   tree (attachToTree),
-        property (textProperty),
-        undoMgr (undoManagerToUse),
-        updating (false)
+    ValueTreeLabelAttachment (juce::ValueTree& _tree,
+                               juce::Label* _label,
+                               juce::Identifier _property,
+                               juce::UndoManager* _undoMgr = nullptr,
+                               std::function <juce::var(juce::var)> _convertTreeToLabel = nullptr,
+                               std::function <juce::var(juce::var)> _convertLabelToTree = nullptr)
+    :   tree (_tree),
+        property (_property),
+        undoMgr (_undoMgr),
+        updating (false),
+        convertTreeToLabel(_convertTreeToLabel),
+        convertLabelToTree(_convertLabelToTree)
     {
         // Don't attach an invalid valuetree!
         jassert (tree.isValid());
-        label = attachToLabel;
+        label = _label;
 
         if (tree.hasProperty (property)) {
-            label->setText (tree.getProperty(property), juce::dontSendNotification);
+          auto value = tree.getProperty(property);
+          if (convertTreeToLabel != nullptr)
+            value = convertTreeToLabel(value);
+
+          label->setText (value, juce::dontSendNotification);
         }
-        else {
-            tree.setProperty (property, label->getText(), undoMgr);
+        else
+        {
+          auto value = label->getText();
+          if (convertLabelToTree != nullptr)
+            value = convertLabelToTree(value);
+
+          tree.setProperty (property, value, undoMgr);
         }
 
         tree.addListener (this);
         label->addListener (this);
     }
 
-    ~ValueTreeLabelAttachment ()
+    ~ValueTreeLabelAttachment () override
     {
         tree.removeListener (this);
         if (label) {
@@ -98,7 +111,11 @@ public:
         if (! updating) {
             updating = true;
             if (label == _label) {
-                tree.setProperty (property, label->getText(), undoMgr);
+              auto value = label->getText();
+              if (convertLabelToTree != nullptr)
+                value = convertLabelToTree(value);
+
+              tree.setProperty (property, value, undoMgr);
             }
             updating = false;
         }
@@ -113,25 +130,25 @@ public:
             updating = true;
             if (treeWhosePropertyHasChanged == tree && label) {
                 if (_property == property) {
-                    label->setText(tree.getProperty (property), juce::dontSendNotification);
+                  auto value = tree.getProperty(property);
+                  if (convertTreeToLabel != nullptr)
+                    value = convertTreeToLabel(value);
+
+                  label->setText(value, juce::dontSendNotification);
                 }
             }
-
             updating = false;
         }
     }
-    
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override {}
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
-    void valueTreeParentChanged (juce::ValueTree &treeWhoseParentHasChanged) override {}
-    void valueTreeRedirected (juce::ValueTree &treeWhichHasBeenChanged) override {}
 
 private:
     juce::ValueTree                             tree;
     juce::Component::SafePointer<juce::Label>   label;
     juce::Identifier                            property;
-    juce::UndoManager*                          undoMgr  = nullptr;
-    bool                                        updating = false;
+    juce::UndoManager*                          undoMgr;
+    bool                                        updating;
+    std::function<juce::var(juce::var)>         convertTreeToLabel;
+    std::function<juce::var(juce::var)>         convertLabelToTree;
+
 };
 
