@@ -72,7 +72,7 @@ public:
         tree.removeListener (this);
     }
 
-    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &property) override
+    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, [[maybe_unused]] const juce::Identifier &property) override
     {
         if (includeChildren || treeWhosePropertyHasChanged == tree) {
             DBG (debugStringForTree (treeWhosePropertyHasChanged) + " property \"" + property.toString() + "\"" +
@@ -81,14 +81,14 @@ public:
         }
     }
 
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override
+    void valueTreeChildAdded (juce::ValueTree &parentTree, [[maybe_unused]] juce::ValueTree &childWhichHasBeenAdded) override
     {
         if (includeChildren || parentTree == tree) {
             DBG (debugStringForTree (parentTree) + " has new child with type: " + childWhichHasBeenAdded.getType().toString());
         }
     }
 
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override
+    void valueTreeChildRemoved (juce::ValueTree &parentTree, [[maybe_unused]] juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override
     {
         if (includeChildren || parentTree == tree) {
             DBG (debugStringForTree(parentTree) + " lost child with type: " +
@@ -96,7 +96,7 @@ public:
         }
     }
 
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override
+    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, [[maybe_unused]] int oldIndex, [[maybe_unused]] int newIndex) override
     {
         if (includeChildren || parentTreeWhoseChildrenHaveMoved == tree) {
             DBG (debugStringForTree (parentTreeWhoseChildrenHaveMoved) + " changed index from " +
