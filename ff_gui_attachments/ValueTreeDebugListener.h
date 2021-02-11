@@ -88,7 +88,7 @@ public:
         }
     }
 
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, [[maybe_unused]] juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override
+    void valueTreeChildRemoved (juce::ValueTree &parentTree, [[maybe_unused]] juce::ValueTree &childWhichHasBeenRemoved, [[maybe_unused]] int indexFromWhichChildWasRemoved) override
     {
         if (includeChildren || parentTree == tree) {
             DBG (debugStringForTree(parentTree) + " lost child with type: " +
