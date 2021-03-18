@@ -4,8 +4,8 @@
  Copyright (c) 2016, Daniel Walz
  All rights reserved.
 
- Redistribution and use in source and binary forms, with or without modification,
- are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
 
  1. Redistributions of source code must retain the above copyright notice, this
  list of conditions and the following disclaimer.
@@ -20,14 +20,14 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- OF THE POSSIBILITY OF SUCH DAMAGE.
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  ==============================================================================
 
@@ -61,7 +61,8 @@
  e.g. th tree behind AudioProcessorValueTreeState. So you can store values
  that are not exposed to the host as parameters.
 
- \see ValueTreeSliderAttachment, ValueTreeComboBoxAttachment, ValueTreeRadioButtonGroupAttachment, ValueTreeLabelAttachment
+ \see ValueTreeSliderAttachment, ValueTreeComboBoxAttachment,
+ ValueTreeRadioButtonGroupAttachment, ValueTreeLabelAttachment
 
  They are used exatly the same as AudioProcessorValueTree::SliderAttachment.
  In the ValueTreeSliderAttachment you can also supply a range for the slider.
@@ -84,29 +85,28 @@
 
     // simply connect the combobox with the ValueTree
     ComboBox* combo = new ComboBox();
-    ValueTreeComboBoxAttachment* comboAttachment = new ValueTreeComboBoxAttachment (select, combo, "name", true);
- \endcode
+    ValueTreeComboBoxAttachment* comboAttachment = new
+ ValueTreeComboBoxAttachment (select, combo, "name", true); \endcode
 
  Have fun...
  Daniel
 
  */
 
-
 #include <juce_core/juce_core.h>
 #include <juce_data_structures/juce_data_structures.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace FF {
-    static juce::Identifier propSelected        ("selected");
-    static juce::Identifier propMinimumDefault  ("minimum");
-    static juce::Identifier propMaximumDefault  ("maximum");
-    static juce::Identifier propIntervalDefault ("interval");
-}
+static juce::Identifier propSelected("selected");
+static juce::Identifier propMinimumDefault("minimum");
+static juce::Identifier propMaximumDefault("maximum");
+static juce::Identifier propIntervalDefault("interval");
+} // namespace FF
 
-#include "ValueTreeSliderAttachment.h"
 #include "ValueTreeComboBoxAttachment.h"
-#include "ValueTreeRadioButtonGroupAttachment.h"
-#include "ValueTreeLabelAttachment.h"
 #include "ValueTreeDebugListener.h"
-
+#include "ValueTreeLabelAttachment.h"
+#include "ValueTreeRadioButtonGroupAttachment.h"
+#include "ValueTreeSliderAttachment.h"
+#include "ValueTreeTextEditorAttachment.h"
